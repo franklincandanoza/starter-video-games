@@ -33,7 +33,14 @@ class GameEngine:
         self._clean()
 
     def _create(self):
-        pass
+        self.pos_cuad = pygame.Vector2(150,100)
+        size_cuad = pygame.Vector2(50,50)
+        col_cuad = pygame.Color(255,255,100)
+        
+        # Creamos la superficio
+        self.surf_cuad = pygame.Surface(size_cuad)
+        # Coloreamos la superficie
+        self.surf_cuad.fill(col_cuad)
 
     def _calculate_time(self):
         pass
@@ -52,6 +59,9 @@ class GameEngine:
     def _draw(self):
         # Limpiamos la pantalla
         self.screen.fill(color=(0,200,128))
+        
+        # Pintamos el cuadrado
+        self.screen.blit(source = self.surf_cuad, dest = self.pos_cuad)
         
         # Presentamos ahora la imagen (desplegarla)
         pygame.display.flip()
