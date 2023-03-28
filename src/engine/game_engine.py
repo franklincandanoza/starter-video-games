@@ -33,6 +33,7 @@ class GameEngine:
         self._clean()
 
     def _create(self):
+        self.vel_cuad = pygame.Vector2(100,100)
         self.pos_cuad = pygame.Vector2(150,100)
         size_cuad = pygame.Vector2(50,50)
         col_cuad = pygame.Color(255,255,100)
@@ -43,7 +44,9 @@ class GameEngine:
         self.surf_cuad.fill(col_cuad)
 
     def _calculate_time(self):
-        pass
+        #Mueva el reloj (En caso de ser cero, irá lo más rápido que pueda)
+        self.clock.tick(self.framerate)
+        self.delta_time = self.clock.get_time()/1000 # Pasamos a segundos
 
     def _process_events(self):
         for event in pygame.event.get():
@@ -54,7 +57,9 @@ class GameEngine:
                 self.is_running = False
         
     def _update(self):
-        pass
+        # Avanzamos en X a 100 pixeles por segundo (Delta time)
+        self.pos_cuad.x += self.vel_cuad.x * self.delta_time
+        self.pos_cuad.y += self.vel_cuad.y * self.delta_time
 
     def _draw(self):
         # Limpiamos la pantalla
