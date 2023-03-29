@@ -1,4 +1,13 @@
 import pygame
+import esper
+from src.ecs.components.c_surface import CSurface
+from src.ecs.components.c_transform import CTransform
+from src.ecs.components.c_velocity import CVelocity
+from src.create.prefab_creator import crear_cuadrado
+
+from src.ecs.systems.s_movement import system_movement
+from src.ecs.systems.s_rendering import system_render
+from src.ecs.systems.s_screen_bounce import system_screen_bounce
 
 class GameEngine:
     def __init__(self) -> None:
@@ -19,6 +28,9 @@ class GameEngine:
         
         # 6. Valor para usar para cálculo del reloj
         self.delta_time = 0    
+        
+        self.ecs_world = esper.World()
+        
     
 
     # Aquí vemos la implementación del game loop
@@ -33,15 +45,12 @@ class GameEngine:
         self._clean()
 
     def _create(self):
-        self.vel_cuad = pygame.Vector2(100,100)
-        self.pos_cuad = pygame.Vector2(150,100)
-        size_cuad = pygame.Vector2(50,50)
-        col_cuad = pygame.Color(255,255,100)
-        
-        # Creamos la superficio
-        self.surf_cuad = pygame.Surface(size_cuad)
-        # Coloreamos la superficie
-        self.surf_cuad.fill(col_cuad)
+        # Creamos la entidad
+        crear_cuadrado(ecs_world=self.ecs_world, 
+                       size=pygame.Vector2(50,50),
+                       pos=pygame.Vector2(150,300), 
+                       vel=pygame.Vector2(-200,300), 
+                       col = pygame.Color(255,100,100))
 
     def _calculate_time(self):
         #Mueva el reloj (En caso de ser cero, irá lo más rápido que pueda)
@@ -53,42 +62,18 @@ class GameEngine:
             
             # Evento cuando se cierra con la X el navegador o cuando se presiona ALT+F4
             if event.type == pygame.QUIT:
-                print("Cerrando la ventana")
                 self.is_running = False
         
     def _update(self):
-        # Avanzamos en X a 100 pixeles por segundo (Delta time)
-        self.pos_cuad.x += self.vel_cuad.x * self.delta_time
-        self.pos_cuad.y += self.vel_cuad.y * self.delta_time
-        
-        # Necesitamos validar si nos estamos saliendo del límite de la pantalla
-        # Rectángulo de la pantalla
-        screen_rect = self.screen.get_rect()
-        
-        # Réctangulo del cuadrado
-        cuad_rect = self.surf_cuad.get_rect(topleft=self.pos_cuad)
-        
-        if cuad_rect.left <=0 or cuad_rect.right >= screen_rect.width:
-            # Invertimos la velocidad
-            self.vel_cuad.x *= -1
-            
-            # Obtenemos un rectángulo que esté dentro del límite de otro rectángulo
-            cuad_rect.clamp_ip(screen_rect)
-            self.pos_cuad.x = cuad_rect.x
-            
-        if cuad_rect.top <=0 or cuad_rect.bottom >= screen_rect.height:
-            # Invertimos la velocidad
-            self.vel_cuad.y *= -1
-            cuad_rect.clamp_ip(screen_rect)
-            self.pos_cuad.y = cuad_rect.y
+        system_movement(world=self.ecs_world, delta_time=self.delta_time)
+        system_screen_bounce(world=self.ecs_world, screen=self.screen)
         
 
     def _draw(self):
         # Limpiamos la pantalla
         self.screen.fill(color=(0,200,128))
         
-        # Pintamos el cuadrado
-        self.screen.blit(source = self.surf_cuad, dest = self.pos_cuad)
+        system_render(world=self.ecs_world, screen = self.screen)
         
         # Presentamos ahora la imagen (desplegarla)
         pygame.display.flip()
