@@ -2,3 +2,4 @@ pygame
 esper
 pygbag
 pyinstaller
+pydantic==1.10.2
